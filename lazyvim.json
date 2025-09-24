@@ -1,7 +1,5 @@
 {
   "extras": [
-    "lazyvim.plugins.extras.ai.codeium",
-    "lazyvim.plugins.extras.ai.copilot-chat",
     "lazyvim.plugins.extras.dap.core",
     "lazyvim.plugins.extras.lang.clangd",
     "lazyvim.plugins.extras.lang.clojure",
@@ -24,7 +22,6 @@
     "lazyvim.plugins.extras.lang.vue",
     "lazyvim.plugins.extras.lang.yaml",
     "lazyvim.plugins.extras.lang.zig",
-    "lazyvim.plugins.extras.util.gitui",
     "lazyvim.plugins.extras.util.startuptime"
   ],
   "install_version": 7,
