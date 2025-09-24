@@ -319,4 +319,196 @@ return {
     end,
     keys = { { "<leader>cv", "<cmd>:VenvSelect<cr>", desc = "Select VirtualEnv" } },
   },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    opts = function(_, opts)
+      if type(opts.ensure_installed) == "table" then
+        vim.list_extend(opts.ensure_installed, { "rust", "toml" })
+      end
+    end,
+  },
+  {
+    "neovim/nvim-lspconfig",
+    opts = {
+      servers = {
+        rust_analyzer = {
+          keys = {
+            { "<leader>cR", "<cmd>RustRunnables<cr>", desc = "Runnables" },
+            { "<leader>ct", "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>", desc = "Hover Actions" },
+            { "<leader>cd", "<cmd>RustDebuggables<cr>", desc = "Debuggables" },
+          },
+          settings = {
+            ["rust-analyzer"] = {
+              cargo = {
+                allFeatures = true,
+                loadOutDirsFromCheck = true,
+              },
+              checkOnSave = {
+                command = "clippy",
+              },
+              procMacro = {
+                enable = true,
+                ignored = {
+                  ["async-trait"] = { "async_trait" },
+                  ["napi-derive"] = { "napi" },
+                  ["async-recursion"] = { "async_recursion" },
+                },
+              },
+            },
+          },
+        },
+      },
+      setup = {
+        rust_analyzer = function(_, opts)
+          require("rust-tools").setup(vim.tbl_deep_extend("force", opts, {
+            server = {
+              on_attach = function(_, bufnr)
+                vim.keymap.set("n", "<leader>cR", "<cmd>RustRunnables<cr>", { buffer = bufnr, desc = "Runnables" })
+                vim.keymap.set("n", "<leader>ct", "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>", { buffer = bufnr, desc = "Hover Actions" })
+                vim.keymap.set("n", "<leader>cd", "<cmd>RustDebuggables<cr>", { buffer = bufnr, desc = "Debuggables" })
+              end,
+            },
+          }))
+          return true
+        end,
+      },
+    },
+  },
+  {
+    "simrat39/rust-tools.nvim",
+    opts = function()
+      return {
+        tools = {
+          executor = require("rust-tools/executors").termopen,
+          reload_workspace_from_cargo_toml = true,
+          inlay_hints = {
+            auto = true,
+            show_parameter_hints = true,
+            parameter_hints_prefix = "",
+            other_hints_prefix = "",
+          },
+        },
+        server = {
+          on_attach = function(_, bufnr)
+            vim.keymap.set("n", "<leader>cR", "<cmd>RustRunnables<cr>", { buffer = bufnr, desc = "Runnables" })
+            vim.keymap.set("n", "<leader>ct", "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>", { buffer = bufnr, desc = "Hover Actions" })
+            vim.keymap.set("n", "<leader>cd", "<cmd>RustDebuggables<cr>", { buffer = bufnr, desc = "Debuggables" })
+          end,
+          settings = {
+            ["rust-analyzer"] = {
+              cargo = {
+                allFeatures = true,
+                loadOutDirsFromCheck = true,
+              },
+              checkOnSave = {
+                command = "clippy",
+              },
+              procMacro = {
+                enable = true,
+                ignored = {
+                  ["async-trait"] = { "async_trait" },
+                  ["napi-derive"] = { "napi" },
+                  ["async-recursion"] = { "async_recursion" },
+                },
+              },
+            },
+          },
+        },
+      }
+    end,
+  },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    opts = function(_, opts)
+      if type(opts.ensure_installed) == "table" then
+        vim.list_extend(opts.ensure_installed, { "javascript", "typescript", "tsx", "jsx", "json" })
+      end
+    end,
+  },
+  {
+    "neovim/nvim-lspconfig",
+    opts = {
+      servers = {
+        tsserver = {
+          keys = {
+            { "<leader>co", "<cmd>OrganizeImports<cr>", desc = "Organize Imports" },
+            { "<leader>cR", "<cmd>TSTypeRename<cr>", desc = "Rename Type" },
+            { "<leader>cd", "<cmd>TSTypes<cr>", desc = "Show Types" },
+          },
+          settings = {
+            typescript = {
+              inlayHints = {
+                includeInlayParameterNameHints = "all",
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = true,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+            javascript = {
+              inlayHints = {
+                includeInlayParameterNameHints = "all",
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = true,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+          },
+        },
+      },
+      setup = {
+        tsserver = function(_, opts)
+          require("typescript").setup({
+            server = vim.tbl_deep_extend("force", opts, {
+              on_attach = function(client, bufnr)
+                client.server_capabilities.documentFormattingProvider = false
+                client.server_capabilities.documentRangeFormattingProvider = false
+              end,
+            }),
+          })
+          return true
+        end,
+      },
+    },
+  },
+  {
+    "jose-elias-alvarez/typescript.nvim",
+    lazy = true,
+    config = function()
+      require("typescript").setup({
+        disable_commands = false,
+        debug = false,
+        server = {
+          on_attach = function(client, bufnr)
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+          end,
+        },
+      })
+    end,
+  },
+  {
+    "williamboman/mason.nvim",
+    opts = function(_, opts)
+      if type(opts.ensure_installed) == "table" then
+        vim.list_extend(opts.ensure_installed, { "prettier", "eslint_d" })
+      end
+    end,
+  },
+  {
+    "nvimtools/none-ls.nvim",
+    opts = function(_, opts)
+      local null_ls = require("null-ls")
+      opts.sources = opts.sources or {}
+      vim.list_extend(opts.sources, {
+        null_ls.builtins.formatting.prettier,
+        null_ls.builtins.diagnostics.eslint_d,
+      })
+    end,
+  },
 }

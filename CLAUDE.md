@@ -111,3 +111,4 @@ The configuration includes comprehensive language support through LazyVim extras
 - All functionality depends on LazyVim being properly installed
 - Plugin configurations follow LazyVim patterns and extend base functionality
 - No build/test commands are needed - this is a configuration directory
+- Generate git message and commit after push it
