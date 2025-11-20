@@ -9,7 +9,6 @@ return {
       position = "right",
     },
   },
-
   {
     "p00f/clangd_extensions.nvim",
     lazy = true,
@@ -294,7 +293,7 @@ return {
     -- stylua: ignore
     keys = {
       { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
-      { "<leader>dPc", function() require('dap-python').test_class() end, desc = "Debug Class", ft = "python" },
+      { "<leader>dPc", function() require('dap-python').test_class() end,  desc = "Debug Class",  ft = "python" },
     },
     config = function()
       local path = require("mason-registry").get_package("debugpy"):get_install_path()
@@ -333,8 +332,12 @@ return {
       servers = {
         rust_analyzer = {
           keys = {
-            { "<leader>cR", "<cmd>RustRunnables<cr>", desc = "Runnables" },
-            { "<leader>ct", "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>", desc = "Hover Actions" },
+            { "<leader>cR", "<cmd>RustRunnables<cr>",   desc = "Runnables" },
+            {
+              "<leader>ct",
+              "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>",
+              desc = "Hover Actions",
+            },
             { "<leader>cd", "<cmd>RustDebuggables<cr>", desc = "Debuggables" },
           },
           settings = {
@@ -364,7 +367,12 @@ return {
             server = {
               on_attach = function(_, bufnr)
                 vim.keymap.set("n", "<leader>cR", "<cmd>RustRunnables<cr>", { buffer = bufnr, desc = "Runnables" })
-                vim.keymap.set("n", "<leader>ct", "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>", { buffer = bufnr, desc = "Hover Actions" })
+                vim.keymap.set(
+                  "n",
+                  "<leader>ct",
+                  "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>",
+                  { buffer = bufnr, desc = "Hover Actions" }
+                )
                 vim.keymap.set("n", "<leader>cd", "<cmd>RustDebuggables<cr>", { buffer = bufnr, desc = "Debuggables" })
               end,
             },
@@ -391,7 +399,12 @@ return {
         server = {
           on_attach = function(_, bufnr)
             vim.keymap.set("n", "<leader>cR", "<cmd>RustRunnables<cr>", { buffer = bufnr, desc = "Runnables" })
-            vim.keymap.set("n", "<leader>ct", "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>", { buffer = bufnr, desc = "Hover Actions" })
+            vim.keymap.set(
+              "n",
+              "<leader>ct",
+              "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>",
+              { buffer = bufnr, desc = "Hover Actions" }
+            )
             vim.keymap.set("n", "<leader>cd", "<cmd>RustDebuggables<cr>", { buffer = bufnr, desc = "Debuggables" })
           end,
           settings = {
@@ -432,8 +445,8 @@ return {
         tsserver = {
           keys = {
             { "<leader>co", "<cmd>OrganizeImports<cr>", desc = "Organize Imports" },
-            { "<leader>cR", "<cmd>TSTypeRename<cr>", desc = "Rename Type" },
-            { "<leader>cd", "<cmd>TSTypes<cr>", desc = "Show Types" },
+            { "<leader>cR", "<cmd>TSTypeRename<cr>",    desc = "Rename Type" },
+            { "<leader>cd", "<cmd>TSTypes<cr>",         desc = "Show Types" },
           },
           settings = {
             typescript = {
