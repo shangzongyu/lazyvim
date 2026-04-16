@@ -100,7 +100,7 @@ return {
     optional = true,
     dependencies = {
       -- Ensure C/C++ debugger is installed
-      "williamboman/mason.nvim",
+      "mason-org/mason.nvim",
       optional = true,
       opts = function(_, opts)
         if type(opts.ensure_installed) == "table" then
@@ -148,7 +148,7 @@ return {
   },
   {
     -- Ensure C/C++ debugger is installed
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     optional = true,
     opts = function(_, opts)
       if type(opts.ensure_installed) == "table" then
@@ -239,7 +239,7 @@ return {
     },
   },
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, { "goimports", "gofumpt", "devel" })
@@ -332,7 +332,7 @@ return {
       servers = {
         rust_analyzer = {
           keys = {
-            { "<leader>cR", "<cmd>RustRunnables<cr>",   desc = "Runnables" },
+            { "<leader>cR", "<cmd>RustRunnables<cr>", desc = "Runnables" },
             {
               "<leader>ct",
               "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>",
@@ -445,8 +445,8 @@ return {
         tsserver = {
           keys = {
             { "<leader>co", "<cmd>OrganizeImports<cr>", desc = "Organize Imports" },
-            { "<leader>cR", "<cmd>TSTypeRename<cr>",    desc = "Rename Type" },
-            { "<leader>cd", "<cmd>TSTypes<cr>",         desc = "Show Types" },
+            { "<leader>cR", "<cmd>TSTypeRename<cr>", desc = "Rename Type" },
+            { "<leader>cd", "<cmd>TSTypes<cr>", desc = "Show Types" },
           },
           settings = {
             typescript = {
@@ -506,7 +506,7 @@ return {
     end,
   },
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = function(_, opts)
       if type(opts.ensure_installed) == "table" then
         vim.list_extend(opts.ensure_installed, { "prettier", "eslint_d" })

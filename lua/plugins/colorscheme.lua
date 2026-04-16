@@ -2,9 +2,10 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "gruvbox",
+      colorscheme = "token",
     },
   },
+  { "ThorstenRhau/token" },
   {
     "ellisonleao/gruvbox.nvim",
     lazy = true,
