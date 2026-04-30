@@ -1,12 +1,13 @@
 return {
-  -- add symbols-outline
   {
-    "simrat39/symbols-outline.nvim",
-    cmd = "SymbolsOutline",
-    keys = { { "<leader>cs", "<cmd>SymbolsOutline<cr>", desc = "Symbols Outline" } },
+    "stevearc/aerial.nvim",
+    cmd = "AerialToggle",
+    keys = { { "<leader>cs", "<cmd>AerialToggle!<cr>", desc = "Symbols Outline" } },
     opts = {
-      -- add your options that should be passed to the setup() function here
-      position = "right",
+      layout = {
+        default_direction = "right",
+      },
+      show_guides = true,
     },
   },
   {
@@ -96,67 +97,6 @@ return {
     end,
   },
   {
-    "mfussenegger/nvim-dap",
-    optional = true,
-    dependencies = {
-      -- Ensure C/C++ debugger is installed
-      "mason-org/mason.nvim",
-      optional = true,
-      opts = function(_, opts)
-        if type(opts.ensure_installed) == "table" then
-          vim.list_extend(opts.ensure_installed, { "codelldb" })
-        end
-      end,
-    },
-    opts = function()
-      local dap = require("dap")
-      if not dap.adapters["codelldb"] then
-        require("dap").adapters["codelldb"] = {
-          type = "server",
-          host = "localhost",
-          port = "${port}",
-          executable = {
-            command = "codelldb",
-            args = {
-              "--port",
-              "${port}",
-            },
-          },
-        }
-      end
-      for _, lang in ipairs({ "c", "cpp" }) do
-        dap.configurations[lang] = {
-          {
-            type = "codelldb",
-            request = "launch",
-            name = "Launch file",
-            program = function()
-              return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-            end,
-            cwd = "${workspaceFolder}",
-          },
-          {
-            type = "codelldb",
-            request = "attach",
-            name = "Attach to process",
-            processId = require("dap.utils").pick_process,
-            cwd = "${workspaceFolder}",
-          },
-        }
-      end
-    end,
-  },
-  {
-    -- Ensure C/C++ debugger is installed
-    "mason-org/mason.nvim",
-    optional = true,
-    opts = function(_, opts)
-      if type(opts.ensure_installed) == "table" then
-        vim.list_extend(opts.ensure_installed, { "codelldb" })
-      end
-    end,
-  },
-  {
     "nvim-treesitter/nvim-treesitter",
     opts = function(_, opts)
       vim.list_extend(opts.ensure_installed, {
@@ -172,10 +112,6 @@ return {
     opts = {
       servers = {
         gopls = {
-          keys = {
-            -- Workaround for the lack of a DAP strategy in neotest-go: https://github.com/nvim-neotest/neotest-go/issues/12
-            { "<leader>td", "<cmd>lua require('dap-go').debug_test()<CR>", desc = "Debug Nearest (Go)" },
-          },
           settings = {
             gopls = {
               gofumpt = true,
@@ -218,19 +154,17 @@ return {
         gopls = function(_, opts)
           -- workaround for gopls not supporting semanticTokensProvider
           -- https://github.com/golang/go/issues/54531#issuecomment-1464982242
-          require("lazyvim.util").lsp.on_attach(function(client, _)
-            if client.name == "gopls" then
-              if not client.server_capabilities.semanticTokensProvider then
-                local semantic = client.config.capabilities.textDocument.semanticTokens
-                client.server_capabilities.semanticTokensProvider = {
-                  full = true,
-                  legend = {
-                    tokenTypes = semantic.tokenTypes,
-                    tokenModifiers = semantic.tokenModifiers,
-                  },
-                  range = true,
-                }
-              end
+          Snacks.util.lsp.on({ name = "gopls" }, function(_, client)
+            if not client.server_capabilities.semanticTokensProvider then
+              local semantic = client.config.capabilities.textDocument.semanticTokens
+              client.server_capabilities.semanticTokensProvider = {
+                full = true,
+                legend = {
+                  tokenTypes = semantic.tokenTypes,
+                  tokenModifiers = semantic.tokenModifiers,
+                },
+                range = true,
+              }
             end
           end)
           -- end workaround
@@ -242,7 +176,7 @@ return {
     "mason-org/mason.nvim",
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
-      vim.list_extend(opts.ensure_installed, { "goimports", "gofumpt", "devel" })
+      vim.list_extend(opts.ensure_installed, { "goimports", "gofumpt" })
     end,
   },
   {
@@ -258,7 +192,7 @@ return {
     opts = {
       servers = {
         pyright = {},
-        ruff_lsp = {
+        ruff = {
           keys = {
             {
               "<leader>co",
@@ -277,28 +211,14 @@ return {
         },
       },
       setup = {
-        ruff_lsp = function()
-          require("lazyvim.util").lsp.on_attach(function(client, _)
-            if client.name == "ruff_lsp" then
-              -- Disable hover in favor of Pyright
-              client.server_capabilities.hoverProvider = false
-            end
+        ruff = function()
+          Snacks.util.lsp.on({ name = "ruff" }, function(_, client)
+            -- Disable hover in favor of Pyright
+            client.server_capabilities.hoverProvider = false
           end)
         end,
       },
     },
-  },
-  {
-    "mfussenegger/nvim-dap-python",
-    -- stylua: ignore
-    keys = {
-      { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
-      { "<leader>dPc", function() require('dap-python').test_class() end,  desc = "Debug Class",  ft = "python" },
-    },
-    config = function()
-      local path = require("mason-registry").get_package("debugpy"):get_install_path()
-      require("dap-python").setup(path .. "/venv/bin/python")
-    end,
   },
   {
     "linux-cultist/venv-selector.nvim",
@@ -327,95 +247,35 @@ return {
     end,
   },
   {
-    "neovim/nvim-lspconfig",
-    opts = {
-      servers = {
-        rust_analyzer = {
-          keys = {
-            { "<leader>cR", "<cmd>RustRunnables<cr>", desc = "Runnables" },
-            {
-              "<leader>ct",
-              "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>",
-              desc = "Hover Actions",
-            },
-            { "<leader>cd", "<cmd>RustDebuggables<cr>", desc = "Debuggables" },
-          },
-          settings = {
-            ["rust-analyzer"] = {
-              cargo = {
-                allFeatures = true,
-                loadOutDirsFromCheck = true,
-              },
-              checkOnSave = {
-                command = "clippy",
-              },
-              procMacro = {
-                enable = true,
-                ignored = {
-                  ["async-trait"] = { "async_trait" },
-                  ["napi-derive"] = { "napi" },
-                  ["async-recursion"] = { "async_recursion" },
-                },
-              },
-            },
-          },
-        },
-      },
-      setup = {
-        rust_analyzer = function(_, opts)
-          require("rust-tools").setup(vim.tbl_deep_extend("force", opts, {
-            server = {
-              on_attach = function(_, bufnr)
-                vim.keymap.set("n", "<leader>cR", "<cmd>RustRunnables<cr>", { buffer = bufnr, desc = "Runnables" })
-                vim.keymap.set(
-                  "n",
-                  "<leader>ct",
-                  "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>",
-                  { buffer = bufnr, desc = "Hover Actions" }
-                )
-                vim.keymap.set("n", "<leader>cd", "<cmd>RustDebuggables<cr>", { buffer = bufnr, desc = "Debuggables" })
-              end,
-            },
-          }))
-          return true
-        end,
-      },
-    },
-  },
-  {
-    "simrat39/rust-tools.nvim",
+    "mrcjkb/rustaceanvim",
+    ft = { "rust" },
     opts = function()
       return {
         tools = {
-          executor = require("rust-tools/executors").termopen,
           reload_workspace_from_cargo_toml = true,
-          inlay_hints = {
-            auto = true,
-            show_parameter_hints = true,
-            parameter_hints_prefix = "",
-            other_hints_prefix = "",
-          },
         },
         server = {
           on_attach = function(_, bufnr)
-            vim.keymap.set("n", "<leader>cR", "<cmd>RustRunnables<cr>", { buffer = bufnr, desc = "Runnables" })
-            vim.keymap.set(
-              "n",
-              "<leader>ct",
-              "<cmd>lua require('rust-tools.hover_actions').hover_actions()<cr>",
-              { buffer = bufnr, desc = "Hover Actions" }
-            )
-            vim.keymap.set("n", "<leader>cd", "<cmd>RustDebuggables<cr>", { buffer = bufnr, desc = "Debuggables" })
+            vim.keymap.set("n", "<leader>cR", function()
+              vim.cmd("RustLsp runnables")
+            end, { buffer = bufnr, desc = "Runnables" })
+            vim.keymap.set("n", "<leader>ct", function()
+              vim.cmd("RustLsp hover actions")
+            end, { buffer = bufnr, desc = "Hover Actions" })
+            vim.keymap.set("n", "<leader>cd", function()
+              vim.cmd("RustLsp debuggables")
+            end, { buffer = bufnr, desc = "Debuggables" })
           end,
-          settings = {
+          default_settings = {
             ["rust-analyzer"] = {
               cargo = {
                 allFeatures = true,
                 loadOutDirsFromCheck = true,
+                buildScripts = {
+                  enable = true,
+                },
               },
-              checkOnSave = {
-                command = "clippy",
-              },
+              checkOnSave = true,
               procMacro = {
                 enable = true,
                 ignored = {
@@ -431,6 +291,16 @@ return {
     end,
   },
   {
+    "neovim/nvim-lspconfig",
+    opts = {
+      servers = {
+        rust_analyzer = {
+          enabled = false,
+        },
+      },
+    },
+  },
+  {
     "nvim-treesitter/nvim-treesitter",
     opts = function(_, opts)
       if type(opts.ensure_installed) == "table" then
@@ -442,11 +312,10 @@ return {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
-        tsserver = {
+        ts_ls = {
           keys = {
-            { "<leader>co", "<cmd>OrganizeImports<cr>", desc = "Organize Imports" },
-            { "<leader>cR", "<cmd>TSTypeRename<cr>", desc = "Rename Type" },
-            { "<leader>cd", "<cmd>TSTypes<cr>", desc = "Show Types" },
+            { "<leader>co", "<cmd>LspTypescriptSourceAction<cr>", desc = "Source Actions" },
+            { "<leader>cD", "<cmd>LspTypescriptGoToSourceDefinition<cr>", desc = "Go To Source Definition" },
           },
           settings = {
             typescript = {
@@ -475,35 +344,18 @@ return {
         },
       },
       setup = {
-        tsserver = function(_, opts)
-          require("typescript").setup({
-            server = vim.tbl_deep_extend("force", opts, {
-              on_attach = function(client, bufnr)
-                client.server_capabilities.documentFormattingProvider = false
-                client.server_capabilities.documentRangeFormattingProvider = false
-              end,
-            }),
-          })
-          return true
+        ts_ls = function(_, opts)
+          local on_attach = opts.on_attach
+          opts.on_attach = function(client, bufnr)
+            if on_attach then
+              on_attach(client, bufnr)
+            end
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+          end
         end,
       },
     },
-  },
-  {
-    "jose-elias-alvarez/typescript.nvim",
-    lazy = true,
-    config = function()
-      require("typescript").setup({
-        disable_commands = false,
-        debug = false,
-        server = {
-          on_attach = function(client, bufnr)
-            client.server_capabilities.documentFormattingProvider = false
-            client.server_capabilities.documentRangeFormattingProvider = false
-          end,
-        },
-      })
-    end,
   },
   {
     "mason-org/mason.nvim",
@@ -511,17 +363,6 @@ return {
       if type(opts.ensure_installed) == "table" then
         vim.list_extend(opts.ensure_installed, { "prettier", "eslint_d" })
       end
-    end,
-  },
-  {
-    "nvimtools/none-ls.nvim",
-    opts = function(_, opts)
-      local null_ls = require("null-ls")
-      opts.sources = opts.sources or {}
-      vim.list_extend(opts.sources, {
-        null_ls.builtins.formatting.prettier,
-        null_ls.builtins.diagnostics.eslint_d,
-      })
     end,
   },
 }

@@ -1,114 +1,53 @@
-# CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository。
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Overview
 
-This is a LazyVim Neovim configuration directory。It's designed to be placed at `$HOME/.config/nvim` and provides a customized Neovim setup with LazyVim as the base configuration。
+LazyVim-based Neovim configuration. No build or test commands — this is a pure config directory that Neovim loads at startup.
 
-## Installation
+## Code Formatting
 
-To install this configuration：
+Lua files must be formatted with **StyLua** (4-space indent, 120 column width per `stylua.toml`):
 
 ```sh
-git clone https://github.com/shangzongyu/lazyvim.git $HOME/.config/nvim
+stylua lua/
 ```
 
-## Configuration Structure
+## Architecture
 
-- `init.lua` - Entry point that loads the main configuration from `config.lazy`
-- `lua/config/` - Core configuration files：
-  - `lazy.lua` - LazyVim bootstrap and plugin manager setup
-  - `options.lua` - Neovim options (currently minimal，extends LazyVim defaults)
-  - `keymaps.lua` - Custom key mappings
-  - `autocmds.lua` - Custom autocommands
-- `lua/plugins/` - Plugin-specific configurations：
-  - `lsp.lua` - Language Server Protocol configurations for multiple languages
-  - `colorscheme.lua` - Color scheme configuration
-  - `wakatime.lua` - Wakatime integration
+- `init.lua` — entry point, loads `lua/config/lazy.lua`
+- `lua/config/lazy.lua` — bootstraps `lazy.nvim`, imports `lazyvim.plugins` and the local `lua/plugins/` spec
+- `lazyvim.json` — controls which LazyVim extras are enabled (edit this to add/remove language packs)
+- `lua/plugins/` — all custom plugin specs returned as Lua tables; each file is auto-imported by lazy.nvim
 
-## Development Commands
+## Plugin Conventions
 
-### Code Formatting
+Custom plugins in `lua/plugins/` follow the lazy.nvim spec pattern:
 
-This configuration uses **StyLua** for Lua code formatting。The style configuration is in `stylua.toml`：
-- Indentation：4 spaces
-- Column width：120 characters
-
-### Plugin Management
-
-- Plugins are managed by `lazy.nvim` (configured in `lua/config/lazy.lua`)
-- Plugin configurations are in the `lua/plugins/` directory
-- The configuration includes numerous LazyVim extras for different languages and tools
-
-## Language Support
-
-The configuration includes comprehensive language support through LazyVim extras：
-
-### Core Languages
-
-- **C/C++** - clangd with extensions，DAP debugging support
-- **Go** - gopls with full language features，debugging support
-- **Python** - pyright + ruff_lsp，virtual environment support，debugging
-- **Rust** - rust-analyzer
-- **TypeScript/JavaScript** - tsserver
-- **Many others** - See `lazyvim.json` for complete list
-
-### AI Integration
-
-### Debugging
-
-- DAP (Debug Adapter Protocol) configured for C/C++, Go，Python
-- Tools：codelldb，debugpy
-
-## Key Features
-
-### LSP Configuration (`lua/plugins/lsp.lua`)
-
-- Multi-language support with language-specific settings
-- Custom root directory detection for C/C++ projects
-- Enhanced clangd configuration with inlay hints and AST display
-- Go development with gopls and comprehensive analysis
-- Python with pyright + ruff_lsp combination
-- Virtual environment selector for Python
-
-### Plugin Management
-
-- Uses lazy loading for optimal performance
-- Automatic plugin updates enabled
-- Custom plugin configurations extend LazyVim defaults
-
-### Editor Features
-
-- Symbols outline for code navigation
-- Enhanced completion with clangd extensions
-- Git integration
-- AI-powered code assistance
-
-## File Structure
-
-```
-~/.config/lazyvim/
-├── init.lua                    # Main entry point
-├── lazyvim.json               # LazyVim extras configuration
-├── lazy-lock.json             # Plugin lock file
-├── stylua.toml               # Lua formatter configuration
-├── lua/
-│   ├── config/
-│   │   ├── lazy.lua         # Plugin manager setup
-│   │   ├── options.lua      # Neovim options
-│   │   ├── keymaps.lua      # Custom keymaps
-│   │   └── autocmds.lua     # Custom autocommands
-│   └── plugins/
-│       ├── lsp.lua          # LSP configurations
-│       ├── colorscheme.lua   # Theme settings
-│       └── wakatime.lua      # Wakatime integration
+```lua
+return {
+  { "plugin/name", opts = { ... } },
+  { "neovim/nvim-lspconfig", opts = { servers = { ... }, setup = { ... } } },
+}
 ```
 
-## Notes
+- Extend LazyVim defaults via `opts = function(_, opts) ... end` — do not replace wholesale.
+- `setup` table in nvim-lspconfig opts is for post-setup hooks (return `false` to skip default setup, `true` to skip lazy.nvim's setup).
 
-- This is a user-specific Neovim configuration，not a standalone project
-- All functionality depends on LazyVim being properly installed
-- Plugin configurations follow LazyVim patterns and extend base functionality
-- No build/test commands are needed - this is a configuration directory
-- Generate git message and commit after push it
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `lua/plugins/lsp.lua` | All LSP server configs (clangd, gopls, pyright+ruff_lsp, rust_analyzer, tsserver) + DAP adapters |
+| `lua/plugins/colorscheme.lua` | Active colorscheme: `token` (ThorstenRhau/token); gruvbox also available |
+| `lua/plugins/wakatime.lua` | Wakatime integration |
+| `lua/config/options.lua` | Neovim options extending LazyVim defaults |
+| `lua/config/autocmds.lua` | Custom autocommands |
+
+## Language-Specific Notes
+
+- **C/C++**: clangd with `--clang-tidy`, `--header-insertion=iwyu`; `<leader>cR` switches source/header; debugger: codelldb
+- **Go**: gopls with gofumpt, staticcheck, full inlay hints; `<leader>td` debug nearest test
+- **Python**: pyright (types) + ruff_lsp (lint/format); ruff_lsp hover disabled in favor of pyright; `<leader>cv` selects virtualenv
+- **Rust**: rust-analyzer via rust-tools.nvim; clippy on save; `<leader>cR/ct/cd` for runnables/hover/debuggables
+- **TypeScript**: tsserver via typescript.nvim; prettier + eslint_d via none-ls; formatting delegated to prettier (LSP formatting disabled)
